@@ -47,19 +47,19 @@ impl Bingo {
         }
     }
 
-    fn play(&mut self) -> Vec<(i32, usize)> {
+    fn play(&mut self) -> Vec<(i32, i32)> {
         let mut aux: Vec<i32> = vec![];
-        let mut ret: Vec<(i32, usize)> = vec![];
-        let mut count = self.cartones.len();
+        let mut ret: Vec<(i32, i32)> = vec![];
         aux.extend_from_slice(&self.numbers);
         for n in aux {
             self.draw_number(n);
             if let Some(res) = self.someone_won() {
-                ret.push((n, res));
-                if self.cartones
+                ret.push((n, self.suma_carton(res)));
+                self.cartones.remove(res);
             }
         }
 
+        println!("{:?}", ret);
         return ret;
     }
 }
@@ -94,8 +94,7 @@ fn parse_file() -> Bingo {
 
 fn main() {
     let mut bingo: Bingo = parse_file();
-    if let Some((last, ncarton)) = bingo.play().pop() {
-        let sum = bingo.suma_carton(ncarton);
+    if let Some((last, sum)) = bingo.play().pop() {
         println!("Last: {}\nSum carton: {}\nResult: {}", last, sum, last*sum);
     } else {
         println!("ERROR");
