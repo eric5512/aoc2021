@@ -9,30 +9,37 @@ struct Bingo {
 }
 
 impl Bingo {
-    fn someone_won(&self) -> Option<usize> {
+    fn someone_won(&self) -> Vec<usize> {
+        let mut ret: Vec<usize> = vec![];
         for (ncarton, carton) in (&self.cartones).into_iter().enumerate() {
+            let mut pushed = false;
             for fila in carton {
                 if fila.into_iter().all(|x| *x == -1i32) {
-                    return Some(ncarton);
+                    ret.push(ncarton);
+                    pushed = true;
+                    break;
                 }
             }
 
-            for i in 0..carton[0].len() {
-                let mut aux: bool = true;
-
-                for fila in carton {
-                    if fila[i] != -1 {
-                        aux = false;
+            if !pushed {
+                for i in 0..carton[0].len() {
+                    let mut aux: bool = true;
+    
+                    for fila in carton {
+                        if fila[i] != -1 {
+                            aux = false;
+                            break;
+                        }
+                    }
+    
+                    if aux {
+                        ret.push(ncarton);
                         break;
                     }
                 }
-
-                if aux {
-                    return Some(ncarton);
-                }
             }
         }
-        return None;
+        return ret;
     }
 
     fn suma_carton(&self, n: usize) -> i32 {
@@ -53,13 +60,17 @@ impl Bingo {
         aux.extend_from_slice(&self.numbers);
         for n in aux {
             self.draw_number(n);
-            if let Some(res) = self.someone_won() {
-                ret.push((n, self.suma_carton(res)));
-                self.cartones.remove(res);
+            let mut winners = self.someone_won();
+            for el in &winners {
+                ret.push((n, self.suma_carton(*el)));
+            }
+            
+            winners.reverse();
+            for el in winners {
+                self.cartones.remove(el);
             }
         }
 
-        println!("{:?}", ret);
         return ret;
     }
 }
